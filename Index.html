@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Animation Code Generator</title>
+    <style>
+        :root {
+            --primary: #6e48aa;
+            --secondary: #9d50bb;
+            --dark: #1a1a2e;
+            --light: #f1f1f1;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --warning: #ff9800;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark), #16213e);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeIn 1s ease;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .editor-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .form-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            animation: slideInLeft 0.5s ease;
+        }
+        
+        .form-section:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title i {
+            font-size: 1.6rem;
+        }
+        
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+            color: #ddd;
+            font-size: 0.95rem;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(110, 72, 170, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 0;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(110, 72, 170, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(110, 72, 170, 0.5);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .code-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: slideInRight 0.5s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .code-title {
+            font-size: 1.4rem;
+            color: var(--secondary);
+        }
+        
+        .action-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .action-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(110, 72, 170, 0.4);
+        }
+        
+        .code-block {
+            background: #1e1e2e;
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.5;
+            flex-grow: 1;
+            min-height: 300px;
+        }
+        
+        .code-block code {
+            color: #f8f8f2;
+            font-size: 0.9rem;
+            white-space: pre;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInLeft {
+            from { 
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from { 
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 180px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 6px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Status Message */
+        .status-message {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes slideIn {
+            from { 
+                bottom: -50px;
+                opacity: 0;
+            }
+            to { 
+                bottom: 20px;
+                opacity: 1;
+            }
+        }
+        
+        /* Pulse Animation */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(110, 72, 170, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(110, 72, 170, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(110, 72, 170, 0);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Roblox Animation Generator</h1>
+            <p class="subtitle">أدخل أرقام الأنيميشن فقط وسيتم توليد الكود تلقائياً مع تنسيق "rbxassetid://"</p>
+        </header>
+        
+        <div class="editor-wrapper">
+            <div class="form-section">
+                <h2 class="section-title"><i class="fas fa-cog"></i> إعدادات الأنيميشن</h2>
+                
+                <div class="input-group">
+                    <label for="idle">
+                        <span class="tooltip">
+                            Idle - الوقوف
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عندما تكون الشخصية واقفة بدون حركة</span>
+                        </span>
+                    </label>
+                    <input type="text" id="idle" class="input-field" placeholder="مثال: 18537376492">
+                </div>
+                
+                <div class="input-group">
+                    <label for="walk">
+                        <span class="tooltip">
+                            Walk - المشي
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عند تحريك الشخصية للأمام أو الخلف</span>
+                        </span>
+                    </label>
+                    <input type="text" id="walk" class="input-field" placeholder="مثال: 18537392113">
+                </div>
+                
+                <div class="input-group">
+                    <label for="run">
+                        <span class="tooltip">
+                            Run - الجري
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عند الركض بالشخصية</span>
+                        </span>
+                    </label>
+                    <input type="text" id="run" class="input-field" placeholder="مثال: 18537384940">
+                </div>
+                
+                <div class="input-group">
+                    <label for="jump">
+                        <span class="tooltip">
+                            Jump - القفز
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عند قفز الشخصية</span>
+                        </span>
+                    </label>
+                    <input type="text" id="jump" class="input-field" placeholder="مثال: 18537367238">
+                </div>
+                
+                <div class="input-group">
+                    <label for="jumpFall">
+                        <span class="tooltip">
+                            Jump Fall - السقوط بعد القفز
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عند هبوط الشخصية بعد القفز</span>
+                        </span>
+                    </label>
+                    <input type="text" id="jumpFall" class="input-field" placeholder="مثال: 18537380791">
+                </div>
+                
+                <div class="input-group">
+                    <label for="swim">
+                        <span class="tooltip">
+                            Swim - السباحة
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عند سباحة الشخصية في الماء</span>
+                        </span>
+                    </label>
+                    <input type="text" id="swim" class="input-field" placeholder="أدخل رقم الأنيميشن">
+                </div>
+                
+                <div class="input-group">
+                    <label for="climb">
+                        <span class="tooltip">
+                            Climb - التسلق
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عند تسلق الشخصية للسلم أو الحائط</span>
+                        </span>
+                    </label>
+                    <input type="text" id="climb" class="input-field" placeholder="أدخل رقم الأنيميشن">
+                </div>
+                
+                <div class="input-group">
+                    <label for="fall">
+                        <span class="tooltip">
+                            Fall - السقوط
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عند سقوط الشخصية من مكان مرتفع</span>
+                        </span>
+                    </label>
+                    <input type="text" id="fall" class="input-field" placeholder="أدخل رقم الأنيميشن">
+                </div>
+                
+                <div class="input-group">
+                    <label for="swimIdle">
+                        <span class="tooltip">
+                            Swim Idle - الوقوف في الماء
+                            <span class="tooltip-text">الأنيميشن الذي يظهر عندما تكون الشخصية واقفة في الماء</span>
+                        </span>
+                    </label>
+                    <input type="text" id="swimIdle" class="input-field" placeholder="أدخل رقم الأنيميشن">
+                </div>
+                
+                <button id="generateBtn" class="generate-btn">
+                    <i class="fas fa-code"></i> توليد الكود
+                </button>
+            </div>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <h3 class="code-title">الكود النهائي</h3>
+                    <button id="copyBtn" class="action-btn">
+                        <i class="far fa-copy"></i> نسخ
+                    </button>
+                </div>
+                
+                <div class="code-block">
+                    <pre><code id="outputCode">-- سيظهر الكود هنا بعد الضغط على زر "توليد الكود"</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusMessage" class="status-message">
+        <i class="fas fa-check-circle"></i> تم نسخ الكود بنجاح!
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // عناصر DOM
+            const inputFields = {
+                idle: document.getElementById('idle'),
+                walk: document.getElementById('walk'),
+                run: document.getElementById('run'),
+                jump: document.getElementById('jump'),
+                jumpFall: document.getElementById('jumpFall'),
+                swim: document.getElementById('swim'),
+                climb: document.getElementById('climb'),
+                fall: document.getElementById('fall'),
+                swimIdle: document.getElementById('swimIdle')
+            };
+            
+            const generateBtn = document.getElementById('generateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const outputCode = document.getElementById('outputCode');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // دالة لتنسيق رقم الأنيميشن
+            function formatAnimationId(id) {
+                if (!id || id.trim() === '') return 'nil';
+                const cleanId = id.trim().replace('rbxassetid://', '');
+                return `"rbxassetid://${cleanId}"`;
+            }
+            
+            // دالة لتوليد الكود
+            function generateAnimationCode() {
+                const animations = {
+                    Walk: formatAnimationId(inputFields.walk.value),
+                    Run: formatAnimationId(inputFields.run.value),
+                    Jump: formatAnimationId(inputFields.jump.value),
+                    JumpFall: formatAnimationId(inputFields.jumpFall.value),
+                    Idle: formatAnimationId(inputFields.idle.value),
+                    Swim: formatAnimationId(inputFields.swim.value),
+                    Climb: formatAnimationId(inputFields.climb.value),
+                    Fall: formatAnimationId(inputFields.fall.value),
+                    SwimIdle: formatAnimationId(inputFields.swimIdle.value)
+                };
+                
+                const codeTemplate = `local Players = game:GetService("Players")
+
+local CUSTOM_ANIMATIONS = {
+    Walk = ${animations.Walk},
+    Run = ${animations.Run},
+    Jump = ${animations.Jump},
+    JumpFall = ${animations.JumpFall},
+    Idle = ${animations.Idle},
+    Swim = ${animations.Swim},
+    Climb = ${animations.Climb},
+    Fall = ${animations.Fall},
+    SwimIdle = ${animations.SwimIdle}
+}
+
+local function setupCharacterAnimations(character)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+        
+    local animate = character:FindFirstChild("Animate")
+    if not animate then return end
+            
+    local animationMap = {
+        {key = "Walk", path = "walk.WalkAnim"},
+        {key = "Run", path = "run.RunAnim"},
+        {key = "Jump", path = "jump.JumpAnim"},
+        {key = "JumpFall", path = "jump.JumpAnimFall"},
+        {key = "Idle", path = "idle.Animation1"},
+        {key = "Swim", path = "swim.Swim"},
+        {key = "Climb", path = "climb.ClimbAnim"},
+        {key = "Fall", path = "fall.FallAnim"},
+        {key = "SwimIdle", path = "swimIdle.SwimIdleAnim"}
+    }
+            
+    for _, animData in ipairs(animationMap) do
+        if CUSTOM_ANIMATIONS[animData.key] then
+            local pathParts = string.split(animData.path, ".")
+            local current = animate
+                    
+            for i = 1, #pathParts - 1 do
+                current = current:FindFirstChild(pathParts[i])
+                if not current then break end
+            end
+                            
+            if current then
+                local anim = current:FindFirstChild(pathParts[#pathParts])
+                if anim then
+                    anim.AnimationId = CUSTOM_ANIMATIONS[animData.key]
+                end
+            end
+        end
+    end
+end
+                
+local function onCharacterAdded(character)
+    setupCharacterAnimations(character)
+end
+                
+local function onPlayerAdded(player)
+    player.CharacterAdded:Connect(onCharacterAdded)
+end
+                
+Players.PlayerAdded:Connect(onPlayerAdded)
+                
+if Players.LocalPlayer.Character then
+    setupCharacterAnimations(Players.LocalPlayer.Character)
+end
+
+Players.LocalPlayer.CharacterAdded:Connect(onCharacterAdded)`;
+                
+                outputCode.textContent = codeTemplate;
+                
+                // إظهار رسالة نجاح
+                statusMessage.innerHTML = '<i class="fas fa-check-circle"></i> تم توليد الكود بنجاح!';
+                statusMessage.style.background = 'var(--success)';
+                statusMessage.style.display = 'flex';
+                
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            // دالة نسخ الكود
+            function copyCodeToClipboard() {
+                const code = outputCode.textContent;
+                navigator.clipboard.writeText(code)
+                    .then(() => {
+                        statusMessage.innerHTML = '<i class="fas fa-check-circle"></i> تم نسخ الكود بنجاح!';
+                        statusMessage.style.background = 'var(--success)';
+                        statusMessage.style.display = 'flex';
+                        
+                        setTimeout(() => {
+                            statusMessage.style.display = 'none';
+                        }, 3000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy code: ', err);
+                        statusMessage.innerHTML = '<i class="fas fa-times-circle"></i> فشل نسخ الكود!';
+                        statusMessage.style.background = 'var(--danger)';
+                        statusMessage.style.display = 'flex';
+                        
+                        setTimeout(() => {
+                            statusMessage.style.display = 'none';
+                        }, 3000);
+                    });
+            }
+            
+            // إضافة مستمعين للأحداث
+            generateBtn.addEventListener('click', generateAnimationCode);
+            copyBtn.addEventListener('click', copyCodeToClipboard);
+            
+            // إمكانية الضغط على Enter في أي حقل لتوليد الكود
+            Object.values(inputFields).forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        generateAnimationCode();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
