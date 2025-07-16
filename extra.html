@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>APK Ultra Extractor – النسخة الاحترافية</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root{
+            --primary:#2c3e50;
+            --secondary:#e74c3c;
+            --accent:#3498db;
+            --success:#27ae60;
+            --bg:#ecf0f1;
+            --card:#ffffff;
+            --text:#2c3e50;
+            --border:#bdc3c7;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',sans-serif}
+        body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+        header{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;padding:20px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+        .container{flex:1;display:flex;max-width:1400px;margin:0 auto;width:100%}
+        aside{width:250px;background:var(--card);border-left:1px solid var(--border);padding:20px}
+        aside nav ul{list-style:none}
+        aside nav li{margin-bottom:10px}
+        aside nav button{
+            width:100%;padding:12px;border:none;border-radius:8px;background:transparent;cursor:pointer;
+            display:flex;align-items:center;gap:10px;font-size:1rem;transition:.3s
+        }
+        aside nav button:hover{background:#f8f9fa}
+        aside nav button.active{background:var(--accent);color:#fff}
+        main{flex:1;padding:20px;background:var(--bg)}
+        .section{display:none}
+        .section.active{display:block}
+
+        /* منطقة الرفع */
+        .upload-zone{
+            border:3px dashed var(--accent);border-radius:15px;padding:60px 20px;text-align:center;
+            cursor:pointer;transition:.3s;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);
+            position:relative;overflow:hidden
+        }
+        .upload-zone.dragover{background:#e3f2fd;border-color:var(--primary)}
+        .upload-zone input[type=file]{display:none}
+        .upload-icon{font-size:80px;color:var(--accent);margin-bottom:20px}
+        .upload-zone h3{margin-bottom:10px;color:var(--primary)}
+        .upload-zone p{color:#6c757d}
+        .upload-btn{background:var(--accent);color:#fff;border:none;padding:15px 40px;border-radius:50px;font-size:1.2rem;cursor:pointer;margin-top:20px}
+        .upload-btn:hover{transform:translateY(-2px)}
+        .progress-bar{width:100%;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;margin:20px 0;display:none}
+        .progress-fill{height:100%;background:var(--accent);width:0%;transition:width .3s}
+
+        /* الإحصائيات */
+        .stats{display:flex;gap:20px;margin:30px 0;flex-wrap:wrap}
+        .stat-card{
+            flex:1;min-width:200px;background:var(--card);border-radius:15px;padding:25px;
+            box-shadow:0 4px 15px rgba(0,0,0,.08);text-align:center;transition:.3s
+        }
+        .stat-card:hover{transform:translateY(-5px)}
+        .stat-card i{font-size:40px;color:var(--accent);margin-bottom:15px}
+        .stat-card h2{font-size:2rem;margin-bottom:5px}
+
+        /* أزرار التنقل السريع */
+        .nav-buttons{
+            position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:1000
+        }
+        .nav-btn{
+            width:50px;height:50px;border:none;border-radius:50%;background:var(--accent);color:#fff;
+            cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,.2);transition:.3s
+        }
+        .nav-btn:hover{transform:scale(1.1)}
+
+        /* تجربة الخطوط */
+        .font-tester{
+            position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--card);
+            border-radius:15px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:999;
+            display:none;max-width:90%;max-height:80%
+        }
+        .font-tester h3{margin-bottom:15px;color:var(--primary)}
+        .font-tester textarea{
+            width:100%;min-height:200px;border:1px solid var(--border);border-radius:8px;
+            padding:15px;font-size:18px;resize:vertical
+        }
+        .font-controls{display:flex;gap:15px;margin:15px 0;flex-wrap:wrap}
+        .font-controls input,.font-controls select{padding:8px;border:1px solid var(--border);border-radius:4px}
+        .close-tester{
+            position:absolute;top:10px;right:10px;background:var(--secondary);color:#fff;
+            border:none;border-radius:50%;width:35px;height:35px;cursor:pointer
+        }
+
+        /* البحث */
+        .search-bar{display:flex;gap:15px;margin-bottom:25px;flex-wrap:wrap}
+        .search-bar input,.search-bar select{
+            padding:12px 15px;border:1px solid var(--border);border-radius:8px;flex:1;min-width:200px
+        }
+
+        /* الشبكة */
+        .grid{display:grid;gap:20px}
+        .grid.images{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+        .grid.videos{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+        .item-card{
+            background:var(--card);border-radius:15px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,.1);
+            transition:.3s;position:relative
+        }
+        .item-card:hover{transform:translateY(-5px)}
+        .item-card img,.item-card video{width:100%;height:180px;object-fit:cover}
+        .item-card .info{padding:15px}
+        .item-card .info h4{font-size:1rem;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .item-card .info p{color:#6c757d;font-size:.9rem}
+
+        /* أزرار التحكم */
+        .card-actions{
+            position:absolute;top:10px;right:10px;display:flex;gap:5px;opacity:0;transition:.3s
+        }
+        .item-card:hover .card-actions{opacity:1}
+        .action-btn{
+            width:35px;height:35px;border:none;border-radius:50%;cursor:pointer;display:flex;
+            align-items:center;justify-content:center;font-size:14px;color:#fff
+        }
+        .preview-btn{background:var(--accent)}
+        .download-btn{background:#27ae60}
+        .test-font-btn{background:#f39c12}
+
+        /* المعاينة */
+        .preview-modal{
+            position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.9);
+            display:none;align-items:center;justify-content:center;z-index:1000
+        }
+        .preview-content{
+            background:#fff;border-radius:15px;padding:20px;max-width:90%;max-height:90%;position:relative
+        }
+        .preview-close{
+            position:absolute;top:10px;right:10px;background:var(--secondary);color:#fff;
+            border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:20px
+        }
+
+        /* أزرار التنقل الكمية */
+        .bulk-actions{margin-bottom:25px;display:flex;gap:15px;flex-wrap:wrap}
+        .bulk-btn{padding:12px 25px;border:none;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;gap:8px}
+        .bulk-download{background:#27ae60;color:#fff}
+
+        /* رسائل التنبيه */
+        .alert{
+            position:fixed;top:20px;right:20px;padding:15px 25px;border-radius:8px;color:#fff;
+            display:none;z-index:1001;animation:slideIn .3s
+        }
+        .alert.success{background:#27ae60}
+        .alert.error{background:var(--secondary)}
+        @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+
+        /* متجاوب */
+        .responsive-nav{display:none;overflow-x:auto;background:var(--card);padding:15px}
+        @media(max-width:768px){
+            .container{flex-direction:column}
+            aside{display:none}
+            .responsive-nav{display:flex}
+            .responsive-nav button{white-space:nowrap;padding:10px 20px;margin:0 5px}
+            .nav-buttons{bottom:80px;right:10px}
+        }
+    </style>
+</head>
+<body>
+    <!-- الرأس -->
+    <header>
+        <h1><i class="fas fa-magic"></i> APK Ultra Extractor – النسخة الاحترافية</h1>
+        <p>استخراج الصور، الفيديوهات، الصوتيات، الخطوط، وتجربة الخطوط مباشرةً</p>
+    </header>
+
+    <!-- الحاوية الرئيسية -->
+    <div class="container">
+        <!-- القائمة الجانبية -->
+        <aside>
+            <nav>
+                <button class="active" data-section="home" onclick="showSection('home')">
+                    <i class="fas fa-home"></i> الرئيسية
+                </button>
+                <button data-section="images" onclick="showSection('images')">
+                    <i class="fas fa-images"></i> الصور <span id="imgCount">0</span>
+                </button>
+                <button data-section="videos" onclick="showSection('videos')">
+                    <i class="fas fa-video"></i> الفيديوهات <span id="vidCount">0</span>
+                </button>
+                <button data-section="audios" onclick="showSection('audios')">
+                    <i class="fas fa-music"></i> الصوتيات <span id="audCount">0</span>
+                </button>
+                <button data-section="fonts" onclick="showSection('fonts')">
+                    <i class="fas fa-font"></i> الخطوط <span id="fontCount">0</span>
+                </button>
+                <button data-section="others" onclick="showSection('others')">
+                    <i class="fas fa-folder-open"></i> أخرى <span id="othCount">0</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- المحتوى -->
+        <main>
+            <!-- شريط تنقل للموبايل -->
+            <div class="responsive-nav">
+                <button class="active" onclick="showSection('home')">الرئيسية</button>
+                <button onclick="showSection('images')">الصور</button>
+                <button onclick="showSection('videos')">فيديو</button>
+                <button onclick="showSection('fonts')">خطوط</button>
+            </div>
+
+            <!-- قسم الرئيسية -->
+            <div class="section active" id="home">
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="apkInput" accept=".apk" style="display:none">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <h3>قم بإسقاط ملف APK هنا أو اضغط لاختيار الملف</h3>
+                    <p>يدعم استخراج: الصور، الفيديوهات، GIF، الصوتيات، الخطوط، وتجربة الخطوط مباشرةً</p>
+                    <button class="upload-btn" onclick="document.getElementById('apkInput').click()">
+                        <i class="fas fa-plus"></i> اختر ملف APK
+                    </button>
+                    <div class="file-info" id="fileInfo"></div>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card"><i class="fas fa-images"></i><h2 id="statImages">0</h2><p>صورة</p></div>
+                    <div class="stat-card"><i class="fas fa-video"></i><h2 id="statVideos">0</h2><p>فيديو</p></div>
+                    <div class="stat-card"><i class="fas fa-music"></i><h2 id="statAudios">0</h2><p>صوت</p></div>
+                    <div class="stat-card"><i class="fas fa-font"></i><h2 id="statFonts">0</h2><p>خط</p></div>
+                </div>
+            </div>
+
+            <!-- قسم الصور -->
+            <div class="section" id="images">
+                <div class="bulk-actions">
+                    <button class="bulk-download" onclick="downloadAll('images')">
+                        <i class="fas fa-download"></i> تحميل الكل
+                    </button>
+                    <button class="bulk-btn" onclick="scrollToTop('images')">
+                        <i class="fas fa-arrow-up"></i> أول صورة
+                    </button>
+                    <button class="bulk-btn" onclick="scrollToBottom('images')">
+                        <i class="fas fa-arrow-down"></i> آخر صورة
+                    </button>
+                </div>
+                <div class="search-bar">
+                    <input type="text" placeholder="ابحث عن صورة..." onkeyup="filterItems(this.value, 'images')">
+                </div>
+                <div class="grid images" id="imagesGrid"></div>
+            </div>
+
+            <!-- قسم الفيديوهات -->
+            <div class="section" id="videos">
+                <div class="bulk-actions">
+                    <button class="bulk-download" onclick="downloadAll('videos')">
+                        <i class="fas fa-download"></i> تحميل الكل
+                    </button>
+                </div>
+                <div class="search-bar">
+                    <input type="text" placeholder="ابحث عن فيديو..." onkeyup="filterItems(this.value, 'videos')">
+                </div>
+                <div class="grid videos" id="videosGrid"></div>
+            </div>
+
+            <!-- قسم الصوتيات -->
+            <div class="section" id="audios">
+                <div class="bulk-actions">
+                    <button class="bulk-download" onclick="downloadAll('audios')">
+                        <i class="fas fa-download"></i> تحميل الكل
+                    </button>
+                </div>
+                <div class="grid" id="audiosGrid"></div>
+            </div>
+
+            <!-- قسم الخطوط (مع تجربة الخط) -->
+            <div class="section" id="fonts">
+                <div class="bulk-actions">
+                    <button class="bulk-download" onclick="downloadAll('fonts')">
+                        <i class="fas fa-download"></i> تحميل الكل
+                    </button>
+                </div>
+                <div class="grid" id="fontsGrid"></div>
+            </div>
+
+            <!-- قسم أخرى -->
+            <div class="section" id="others">
+                <div class="bulk-actions">
+                    <button class="bulk-download" onclick="downloadAll('others')">
+                        <i class="fas fa-download"></i> تحميل الكل
+                    </button>
+                </div>
+                <div class="grid" id="othersGrid"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- أزرار التنقل السريع -->
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="scrollToTop()" title="الطلوع للأعلى">
+            <i class="fas fa-chevron-up"></i>
+        </button>
+        <button class="nav-btn" onclick="scrollToBottom()" title="النزول للأسفل">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+
+    <!-- معاينة الخط -->
+    <div class="font-tester" id="fontTester">
+        <button class="close-tester" onclick="closeFontTester()">&times;</button>
+        <h3>تجربة الخط: <span id="fontName"></span></h3>
+        <div class="font-controls">
+            <label>حجم الخط: <input type="range" min="12" max="72" value="24" id="fontSizeRange"> <span id="fontSizeValue">24</span>px</label>
+            <label>نمط الخط:
+                <select id="fontWeightSelect">
+                    <option value="normal">عادي</option>
+                    <option value="bold">ثقيل</option>
+                </select>
+            </label>
+        </div>
+        <textarea id="fontText" placeholder="اكتب هنا لتجربة الخط...">أهلاً وسهلاً بكم في APK Ultra Extractor! هذه تجربة الخط المختار.</textarea>
+    </div>
+
+    <!-- المعاينة -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <button class="preview-close" onclick="closeModal()">&times;</button>
+            <div id="previewContainer"></div>
+        </div>
+    </div>
+
+    <!-- رسائل التنبيه -->
+    <div class="alert" id="alertBox"></div>
+
+    <!-- شاشة التحميل -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>جاري معالجة ملف APK...</h3>
+            <p>يرجى الانتظار قليلاً</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script>
+        // المتغيرات
+        let extractedData = {images:[],videos:[],audios:[],fonts:[],others:[]};
+        let currentFont = null;
+
+        const fileTypes = {
+            images:['png','jpg','jpeg','gif','webp','bmp','ico','svg','tiff','tif'],
+            videos:['mp4','3gp','webm','mkv','avi','mov','flv','wmv','m4v'],
+            audios:['mp3','wav','ogg','m4a','aac','flac','wma','opus'],
+            fonts:['ttf','otf','woff','woff2','eot'],
+            others:['xml','json','properties','bin','dat','db','so','dex','jar','class']
+        };
+
+        // التنقل
+        function showSection(section){
+            document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            document.querySelectorAll('button[data-section]').forEach(b=>b.classList.remove('active'));
+            document.querySelectorAll(`button[data-section="${section}"]`).forEach(b=>b.classList.add('active'));
+        }
+
+        // الرفع
+        const apkInput = document.getElementById('apkInput');
+        const uploadZone = document.getElementById('uploadZone');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        ['dragenter','dragover'].forEach(evt=>uploadZone.addEventListener(evt,e=>{e.preventDefault();uploadZone.classList.add('dragover')}));
+        ['dragleave','drop'].forEach(evt=>uploadZone.addEventListener(evt,e=>{e.preventDefault();uploadZone.classList.remove('dragover')}));
+        uploadZone.addEventListener('drop',e=>{
+            const files=e.dataTransfer.files;
+            if(files.length && files[0].name.toLowerCase().endsWith('.apk')) handleFile(files[0]);
+        });
+        apkInput.addEventListener('change',e=>{if(e.target.files.length) handleFile(e.target.files[0])});
+
+        async function handleFile(file){
+            if(!file) return;
+            document.getElementById('fileInfo').innerHTML=`<strong>الملف:</strong> ${file.name}<br><strong>الحجم:</strong> ${formatSize(file.size)}`;
+            loadingOverlay.style.display='flex';
+            try{
+                const zip = await JSZip.loadAsync(file);
+                extractedData={images:[],videos:[],audios:[],fonts:[],others:[]};
+                let total=0,processed=0;
+                for(const [path,entry] of Object.entries(zip.files)) if(!entry.dir) total++;
+                for(const [path,entry] of Object.entries(zip.files)){
+                    if(entry.dir) continue;
+                    processed++; document.getElementById('progressFill').style.width=(processed/total)*100+'%';
+                    const ext=path.split('.').pop()?.toLowerCase();
+                    let type='others'; for(const [t,exts] of Object.entries(fileTypes)) if(exts.includes(ext)){type=t;break;}
+                    try{
+                        const blob=await entry.async('blob');
+                        extractedData[type].push({url:URL.createObjectURL(blob),name:path.split('/').pop()||'unknown',size:blob.size,type:ext,path});
+                    }catch(e){console.warn('خطأ:',path)}
+                }
+                updateUI(); showSection('images'); showAlert(`تم استخراج ${processed} عنصر!`,'success');
+            }catch(err){showAlert('خطأ في فك الملف APK','error')}
+            finally{loadingOverlay.style.display='none'; document.getElementById('progressFill').style.width='0%';}
+        }
+
+        function updateUI(){
+            ['images','videos','audios','fonts','others'].forEach(type=>{
+                const count=extractedData[type].length;
+                const el=document.getElementById(type+'Count'); if(el) el.textContent=count;
+                const st=document.getElementById('stat'+type.charAt(0).toUpperCase()+type.slice(1)); if(st) st.textContent=count;
+                renderGrid(type,extractedData[type]);
+            });
+        }
+
+        function renderGrid(type,items){
+            const grid=document.getElementById(type+'Grid'); if(!grid) return;
+            grid.innerHTML='';
+            if(!items.length){grid.innerHTML='<div style="text-align:center;padding:40px"><i class="fas fa-search" style="font-size:50px"></i><h3>لا توجد عناصر</h3></div>';return}
+            items.forEach((item,idx)=>{
+                const card=document.createElement('div'); card.className='item-card'; card.dataset.index=idx;
+                if(type==='images'){
+                    card.innerHTML=`<img src="${item.url}" loading="lazy"><div class="info"><h4>${item.name}</h4><p>${formatSize(item.size)}</p></div>
+                    <div class="card-actions">
+                        <button class="action-btn preview-btn" onclick="previewItem('${item.url}','image')"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn download-btn" onclick="downloadItem('${item.url}','${item.name}')"><i class="fas fa-download"></i></button>
+                    </div>`;
+                }else if(type==='videos'){
+                    card.innerHTML=`<video src="${item.url}" muted></video><div class="info"><h4>${item.name}</h4><p>${formatSize(item.size)}</p></div>
+                    <div class="card-actions">
+                        <button class="action-btn preview-btn" onclick="previewItem('${item.url}','video')"><i class="fas fa-play"></i></button>
+                        <button class="action-btn download-btn" onclick="downloadItem('${item.url}','${item.name}')"><i class="fas fa-download"></i></button>
+                    </div>`;
+                }else if(type==='fonts'){
+                    card.innerHTML=`<div style="padding:30px;text-align:center;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff">
+                        <i class="fas fa-font" style="font-size:50px"></i><h4>${item.name}</h4><p>${formatSize(item.size)}</p>
+                        <button class="action-btn test-font-btn" onclick="testFont('${item.url}','${item.name}')"><i class="fas fa-edit"></i></button>
+                    </div>`;
+                }else{
+                    card.innerHTML=`<div style="padding:30px;text-align:center;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff">
+                        <i class="fas fa-file" style="font-size:50px"></i><h4>${item.name}</h4><p>${formatSize(item.size)}</p>
+                    </div>`;
+                }
+                grid.appendChild(card);
+            });
+        }
+
+        // تجربة الخط
+        function testFont(url,name){
+            currentFont=url;
+            document.getElementById('fontName').textContent=name;
+            const fontFace=new FontFace('currentFont',`url(${url})`);
+            fontFace.load().then(font=>{
+                document.fonts.add(font);
+                document.getElementById('fontText').style.fontFamily='currentFont';
+                document.getElementById('fontTester').style.display='block';
+            });
+        }
+        function closeFontTester(){document.getElementById('fontTester').style.display='none'}
+        document.getElementById('fontSizeRange').addEventListener('input',e=>{
+            document.getElementById('fontSizeValue').textContent=e.target.value;
+            document.getElementById('fontText').style.fontSize=e.target.value+'px';
+        });
+        document.getElementById('fontWeightSelect').addEventListener('change',e=>{
+            document.getElementById('fontText').style.fontWeight=e.target.value;
+        });
+
+        // التنقل السريع
+        function scrollToTop(section){document.getElementById(section+'Grid').scrollIntoView({behavior:'smooth'})}
+        function scrollToBottom(section){
+            const grid=document.getElementById(section+'Grid');
+            const last=grid.lastElementChild; if(last) last.scrollIntoView({behavior:'smooth'});
+        }
+        function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
+        function scrollToBottom(){window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}
+
+        // المعاينة
+        function previewItem(url,type){
+            const modal=document.getElementById('previewModal');
+            const container=document.getElementById('previewContainer');
+            if(type==='image') container.innerHTML=`<img src="${url}" style="max-width:100%;max-height:80vh;border-radius:10px">`;
+            else if(type==='video') container.innerHTML=`<video controls autoplay style="max-width:100%;max-height:80vh;border-radius:10px"><source src="${url}"></video>`;
+            modal.style.display='flex';
+        }
+        function closeModal(){document.getElementById('previewModal').style.display='none'}
+
+        // التحميل والتصفية
+        function downloadItem(url,name){
+            const a=document.createElement('a'); a.href=url; a.download=name; a.click();
+            showAlert(`تم تحميل: ${name}`,'success');
+        }
+        function downloadAll(type){
+            if(!extractedData[type] || !extractedData[type].length){showAlert('لا توجد عناصر','error');return}
+            extractedData[type].forEach((item,i)=>setTimeout(()=>downloadItem(item.url,item.name),i*200));
+            showAlert(`جاري تحميل ${extractedData[type].length} عنصر`,'success');
+        }
+        function filterItems(query,type){
+            if(!extractedData[type]) return;
+            const filtered=extractedData[type].filter(item=>item.name.toLowerCase().includes(query.toLowerCase()));
+            renderGrid(type,filtered);
+        }
+        function formatSize(bytes){
+            if(bytes<1024) return bytes+' B';
+            else if(bytes<1024*1024) return (bytes/1024).toFixed(1)+' KB';
+            else return (bytes/(1024*1024)).toFixed(1)+' MB';
+        }
+        function showAlert(message,type){
+            const alert=document.getElementById('alertBox');
+            alert.textContent=message; alert.className=`alert ${type}`; alert.style.display='block';
+            setTimeout(()=>alert.style.display='none',3000);
+        }
+
+        // إعدادات إضافية
+        window.addEventListener('click',e=>{if(e.target.classList.contains('preview-modal'))closeModal()});
+        document.addEventListener('keydown',e=>{
+            if(e.key==='Escape'){closeModal(); closeFontTester();}
+        });
+    </script>
+</body>
+</html>
